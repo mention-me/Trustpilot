@@ -9,22 +9,44 @@ env:
 
 jobs:
   phpunit:
-    name: PHP Unit
+    name: PHPUnit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
 
-      - run: composer validate --strict
-
-      - name: Cache Composer packages
+      - name: Get Composer cache directory
         id: composer-cache
-        uses: actions/cache@v2
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Configure PHP extension cache
+        id: php-extension-cache
+        uses: shivammathur/cache-extensions@1.6.1
         with:
-          path: vendor
+          php-version: ${{ env.php-version }}
+          extensions: ${{ env.php-extensions }}
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+
+      - name: Cache Composer packages and PHP extensions
+        uses: actions/cache@v2.1.6
+        with:
+          path: |
+            ${{ steps.php-extension-cache.outputs.dir }}
+            ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-php-
+      - name: Setup PHP with Composer and extensions
+        uses: shivammathur/setup-php@2.11.0
+        with:
+          php-version: ${{ env.php-version }}
+          extensions: ${{ env.php-extensions }}
 
-      - run: composer install --prefer-dist --no-progress
+      - run: composer validate
 
-      - run: composer test
+      - run: composer install --no-progress
+
+      - name: Validate phpunit.xml
+        run: "${GITHUB_WORKSPACE}/.github/workflows/scripts/check_phpunit_xml.sh"
+
+      - name: Run PHPUnit
+        run: $(composer config bin-dir)/phpunit --colors=always --configuration app/phpunit.xml --testsuite PhpUnitTests
