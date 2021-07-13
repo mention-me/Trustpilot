@@ -37,4 +37,4 @@ jobs:
       - run: composer install --no-progress
 
       - name: Run PHPUnit
-        run: $(composer config bin-dir)/phpunit --colors=always --configuration phpunit.xml --testsuite PhpUnitTests
+        run: $(composer config bin-dir)/phpunit --colors=always --configuration phpunit.xml --testsuite TrustpilotTestSuite
