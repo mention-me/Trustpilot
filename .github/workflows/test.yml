@@ -26,11 +26,10 @@ jobs:
           extensions: ${{ env.php-extensions }}
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
 
-      - name: Cache Composer packages and PHP extensions
+      - name: Cache Composer packages
         uses: actions/cache@v2.1.6
         with:
           path: |
-            ${{ steps.php-extension-cache.outputs.dir }}
             ${{ steps.composer-cache.outputs.dir }}
           key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
@@ -39,7 +38,6 @@ jobs:
         uses: shivammathur/setup-php@2.11.0
         with:
           php-version: ${{ env.php-version }}
-          extensions: ${{ env.php-extensions }}
 
       - run: composer validate
 
