@@ -4,6 +4,9 @@ on:
   - push
   - pull_request
 
+env:
+  php-version: 7.3
+
 jobs:
   phpunit:
     name: PHP Unit
